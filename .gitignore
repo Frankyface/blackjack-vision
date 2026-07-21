@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Model weights & exports (downloaded from upstream / generated — see docs/decisions.md D12)
+models/
+*.pt
+*_ncnn_model/
+
+# Captures / debug output
+captures/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
