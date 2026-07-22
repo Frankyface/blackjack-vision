@@ -1,9 +1,10 @@
 # blackjack-vision — CLAUDE.md
 
 Blackjack trainer: a webcam + YOLOv8 reads real cards on the table; a Raspberry Pi 5 + HDMI
-screen shows the correct play, the running/true count, and (later) win odds.
-Stack: Python 3.11 · Ultralytics YOLOv8 (pretrained weights from cadyze/card-vision, MIT) ·
-OpenCV · Pygame fullscreen UI · pytest · NCNN export for Pi inference.
+screen shows the correct play, the running/true count, and win odds.
+Stack: Python 3.9 on the PC / 3.11 on the Pi (write 3.9-compatible code) · Ultralytics
+YOLOv8-nano (pretrained weights from cadyze/card-vision, MIT) · OpenCV · Pygame fullscreen
+UI · pytest · NCNN export for Pi inference.
 
 ## First actions every session
 1. Read `handoff.md` FIRST, then follow its Pointer to the active stage/feature file.
@@ -18,7 +19,10 @@ When the user says "update all relevant files", run `/sync-docs`.
 - Pure logic (strategy / counting / EV engines) lives apart from I/O (camera, UI) so it is
   unit-testable. Engines return new state — never mutate inputs.
 - All game-rule-dependent values come from `config/rules.yaml`. Never hardcode them.
-- Run the app (PC): `python -m src.app` · Run tests: `pytest`
+- Run the app (PC, via .venv): `python -m src.app` (`--selftest` headless smoke,
+  `--camera-test` webcam check, `--run-seconds N` timed run) · Run tests: `pytest`
+- Fresh clone: `pip install -r requirements.txt` + `python scripts/fetch_model.py`
+  (models/ is gitignored).
 - Verification convention: math engines → pytest required (80%+ on engine modules);
   CV/UI features → live webcam demo, result recorded in the feature's Verification Log.
 - Git: work on `main`, commit at every verified-green checkpoint, conventional commits

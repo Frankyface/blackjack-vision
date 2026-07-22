@@ -4,7 +4,17 @@ A Raspberry Pi 5 blackjack trainer. A webcam watches real cards on the table; a 
 reads them; an HDMI screen shows the mathematically correct play, the Hi-Lo running/true count,
 and (eventually) live win probabilities. Deal, glance, learn.
 
-**Status:** early development — see `handoff.md` for the current state.
+**Status:** fully implemented and unit-tested (183 tests); live table verification and the
+Raspberry Pi install are in progress — see `handoff.md` for the current state.
+
+## Quick start (PC)
+```
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt   # (bin/ on Linux)
+.venv/Scripts/python scripts/fetch_model.py     # downloads the card-vision weights
+.venv/Scripts/python -m src.app                 # ESC quit · SPACE end hand · N new shoe · TAB rules
+```
+For the Raspberry Pi 5: `bash deploy/install_pi.sh`, then see `deploy/blackjack-vision.service`.
 
 ## How it works
 Webcam frames → YOLOv8 card detection → zone mapping (dealer's card top of frame, player's hand

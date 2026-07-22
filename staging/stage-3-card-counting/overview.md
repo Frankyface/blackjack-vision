@@ -6,8 +6,8 @@ decks remaining), and a simple bet hint, with keyboard shoe control. At stage en
 keeps an accurate count through a whole shoe.
 
 ## Features
-- [ ] `feature-hilo-engine.md` — pure counting engine (running/true count, decks remaining, bet hint)
-- [ ] `feature-shoe-session.md` — cards-seen ledger across hands, "new shoe" reset, count panel in the UI
+- [x] `feature-hilo-engine.md` — pure counting engine (running/true count, decks remaining, bet hint) _(verified done)_
+- [ ] `feature-shoe-session.md` — cards-seen ledger across hands, "new shoe" reset, count panel in the UI _(awaiting verification — live full-shoe count)_
 
 ## Definition of done (testable checklist)
 - [ ] `pytest` green: Hi-Lo values, true-count division/rounding, decks-remaining estimate,
@@ -19,7 +19,8 @@ keeps an accurate count through a whole shoe.
 - [ ] Both feature files `verified done` with log entries.
 
 ## Notes
-Moderate detail by design (progressive elaboration) — flesh out the feature files when Stage 2
-nears completion. Known design question to resolve then: how the ledger infers "this hand
-ended" so cards leaving the table aren't re-counted next hand (likely: SPACE keypress from the
-UI marks end-of-hand in v1; automatic in Stage 6).
+Resolved design question: end-of-hand is BOTH manual (SPACE) and automatic (stage 6's
+RoundTracker fires when the table stays empty). Double-count protection uses the
+"returnable pool" ledger (docs/decisions.md D17): a card that left the felt this hand
+absorbs the next identical ADDED as a return; leftovers at end-of-hand go stale and can
+never recount. Chosen failure direction is undercounting — check for it in the live test.

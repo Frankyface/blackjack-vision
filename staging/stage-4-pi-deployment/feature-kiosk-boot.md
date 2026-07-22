@@ -16,7 +16,10 @@ Live on the Pi: power-cycle test ×2 with boot-to-detecting time recorded; `kill
 and watch it return. Record in the log.
 
 ## Verification Log
-_(empty)_
+**2026-07-21 (Claude):** `deploy/blackjack-vision.service` written (systemd user service,
+Restart=on-failure, linger instructions in comments). Nothing executed yet — all
+success criteria need the physical Pi (help.md #3). Status stays not started for
+verification purposes; the artifact merely exists.
 
 ## Open Questions
 - Light detail by design — flesh out at Stage 3 completion (autologin + cage/labwc kiosk vs

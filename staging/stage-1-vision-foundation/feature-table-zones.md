@@ -1,5 +1,5 @@
 # Feature: Table zones
-_Stage: stage-1-vision-foundation · Status: not started_
+_Stage: stage-1-vision-foundation · Status: awaiting verification_
 
 ## Goal
 Split the camera frame into a DEALER zone (top) and PLAYER zone (bottom) so every detected card
@@ -22,7 +22,11 @@ table to match.
 4. Edit the config value, restart, confirm the line moved. Record results in the log.
 
 ## Verification Log
-_(empty)_
+**2026-07-21 (Claude):** Implemented `src/zones.py` (pure) + boundary/labels drawn in the
+UI camera panel; split configurable as `zones.split` in config/app.yaml. `pytest
+tests/test_zones.py` → 7 tests green (top/bottom/on-line/moved-boundary/validation).
+Live steps 2-4 (cards straddling the line on camera, config change visibly moving the
+line) pending Cam's table session.
 
 ## Open Questions
 - Is a straight horizontal line enough, or does Cam's camera angle need a tilted/curved

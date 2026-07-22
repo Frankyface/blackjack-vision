@@ -1,5 +1,5 @@
 # Feature: Stable card reading
-_Stage: stage-1-vision-foundation · Status: not started_
+_Stage: stage-1-vision-foundation · Status: awaiting verification_
 
 ## Goal
 Turn noisy per-frame YOLO detections into a trustworthy "cards currently on the table" set:
@@ -36,7 +36,15 @@ every engine depends on — a phantom card would corrupt advice AND the count.
   majority/confidence vote is needed. Check with real footage.
 
 ## Verification Log
-_(empty)_
+**2026-07-21 (Claude):** Implemented `src/stable.py` — greedy single-link corner
+clustering + per-instance debounce (confirm 5 / forget 15 frames, configurable). `pytest
+tests/test_stable_reading.py` → 12 tests green: two-corner merge, transitive chains,
+same card in both zones, two far-apart copies, flicker rejection, occlusion survival,
+removal after forget, second-instance ADDED events, reset. UI shows the stable set (not
+raw detections). Live steps 2-4 (real 3-card hand steady 10 s, hand-wave occlusion,
+removal timing) pending Cam's table session. Behavior note: after a REMOVED, a re-add of
+the same (card, zone, instance) within one hand does NOT recount — safer against double
+counting; recorded for the live test to confirm it feels right.
 
 ## Notes & Decisions
 - none yet — revisit when starting.

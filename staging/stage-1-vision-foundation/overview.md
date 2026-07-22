@@ -6,9 +6,12 @@ per-frame output into a stable, zone-aware stream of "these cards are on the tab
 the blackjack engines (Stage 2+) can trust.
 
 ## Features
-- [ ] `feature-run-card-vision-locally.md` — upstream YOLOv8 detector running on Cam's PC + webcam
-- [ ] `feature-table-zones.md` — dealer/player zone mapping with visual overlay
-- [ ] `feature-stable-card-reading.md` — corner dedupe + debounce → stable card set
+- [ ] `feature-run-card-vision-locally.md` — upstream YOLOv8 detector running on Cam's PC + webcam _(awaiting verification — live card check)_
+- [ ] `feature-table-zones.md` — dealer/player zone mapping with visual overlay _(awaiting verification — live boundary check)_
+- [ ] `feature-stable-card-reading.md` — corner dedupe + debounce → stable card set _(awaiting verification — live occlusion check)_
+
+**Status 2026-07-21:** all code + unit tests done and green; every remaining checklist item
+below needs Cam's webcam pointed at real cards on his table (help.md #1).
 
 ## Definition of done (testable checklist)
 - [ ] `python -m src.app` opens a live window showing the webcam feed with detection boxes.

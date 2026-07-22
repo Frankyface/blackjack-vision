@@ -42,7 +42,8 @@ on-screen settings editor (v1 config is file-only), touch input, sound.
 
 ## Tech stack & key decisions
 (Each decision's full rationale: see `docs/decisions.md`.)
-- **Python 3.11** — upstream repo's language; native on Raspberry Pi OS.
+- **Python** — 3.9 on the dev PC (system install, all deps support it — see D13),
+  3.11 on the Pi (OS default). Code stays 3.9-compatible.
 - **Ultralytics YOLOv8 + upstream `best.pt`** — proven ~90% mAP, 55 classes, MIT. [D1]
 - **OpenCV** — webcam capture and frame handling. [D1]
 - **Pygame fullscreen UI** — camera panel + advice panel + keyboard input, same code on PC and Pi. [D9]
@@ -86,8 +87,9 @@ config/rules.yaml (decks, S17/H17, DAS, payouts …)
 | 6. game-tracker | Whole-table awareness | Auto rounds + session stats + settings UI | A full session scored with zero keyboard input |
 
 ## Open questions & risks
-1. **Pi 5 inference speed** — YOLOv8 CPU inference may be a few FPS even via NCNN. Likely fine
-   for a ~2 s advice budget; measure early in Stage 4. Fallback: Pi AI Kit (Hailo, ~$70).
+1. **Pi 5 inference speed** — largely retired 2026-07-21: the weights are YOLOv8-nano and
+   the NCNN export runs 71 ms/frame on the dev PC with identical detections; Pi 5 estimate
+   ~200-350 ms, inside the 2 s budget. Confirm on-device in Stage 4. Fallback: Pi AI Kit.
 2. **Real-world detection accuracy** — 90% mAP was on the author's setup. Cam's lighting,
    webcam, card design, and overlapping dealt cards are the real test (Stage 1 exists to
    prove this). Fallback: fine-tune on photos of Cam's cards.

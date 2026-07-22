@@ -3,10 +3,13 @@
 Ordered checklist of human-only tasks. Each item: what, why, and which stage it blocks.
 Sessions add items here whenever they hit a wall only Cam can clear.
 
-- [ ] **1. Confirm the webcam model + set up a stable overhead-ish mount.**
+- [ ] **1. Point the webcam at your table (stable overhead-ish mount).**
   Why: detection accuracy depends heavily on view angle, focus, and stability. A cheap clamp
   arm / gooseneck phone-holder style mount over the table works well.
-  Blocks: Stage 1 live verification (detector can be *installed* without it, not *proven*).
+  Status: your webcam WORKS (verified 2026-07-21: opens at 1280×720, ~8 fps) — it's
+  currently pointed at the room. Once it faces cards, run `python -m src.app` and we do the
+  Stage 1 live checks together (`/verify`).
+  Blocks: Stage 1/2/3 live verification (all code is ready and waiting).
 
 - [ ] **2. Confirm the HDMI screen for the Pi (own it? which size?).**
   Why: the UI layout (font sizes, panel split) should be designed for the real resolution.

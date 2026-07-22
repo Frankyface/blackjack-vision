@@ -74,3 +74,54 @@ keeps reuse clean. · **Rejected:** private repo. · **Revisit if:** never likel
 fetches `best.pt` from the card-vision repo. · **Because:** keeps this repo lean; weights remain
 canonical upstream; MIT permits use with attribution. · **Revisit if:** upstream repo
 disappears → commit a copy (license allows) or mirror it.
+
+## 2026-07-21 — D13: Dev environment is the system Python 3.9
+**Chose:** Build the PC venv on the machine's Python 3.9.13 and keep all code
+3.9-compatible (string-quoted `str | Path` annotations, no match statements).
+· **Because:** it's what's installed; every dependency (ultralytics 8.4, torch 2.8 CPU,
+pygame 2.6) supports it; the Pi independently runs its own 3.11. · **Rejected:**
+installing Python 3.11 on the PC (system change for zero functional gain).
+· **Revisit if:** a dependency drops 3.9 support.
+
+## 2026-07-21 — D14: EV engine = current-composition recursion with documented approximations
+**Chose:** Per-action EV via exact recursion over dealer outcomes and player hit states,
+with (a) draw probabilities FIXED at the current shoe composition, (b) no-dealer-BJ
+conditioning for 10/A up-cards, (c) split EV = 2× one post-split hand (no resplits,
+split aces get one card), (d) surrender = exactly −0.5. · **Because:** milliseconds-fast,
+composition-aware (uses the ledger), reproduces published numbers (dealer distributions
+in classic windows; EV-optimal matches the chart on all 30 tested clear cells; 16v10 ≈
+−0.54/−0.54). · **Rejected:** Monte Carlo (noisy, slower, harder to test); full
+without-replacement recursion (state space explodes, negligible accuracy gain for a
+trainer). · **Revisit if:** EV numbers ever get used for real bet-sizing decisions beyond
+the display.
+
+## 2026-07-21 — D15: Auto-round detection + approximate advice-accuracy inference
+**Chose:** A round ends when the table stays empty for N consecutive updates
+(RoundTracker); outcome scored from the last full table seen. Advice-followed stats infer
+only HIT/STAND decisions (card count grew / round ended), excluding double/split.
+· **Because:** zero-keyboard sessions with honest, testable semantics; partial inference
+beats pretending we can see chips. · **Rejected:** requiring SPACE every hand (still
+works as a manual override); full action inference (can't distinguish double from hit
+by card count alone). · **Revisit if:** stage-6 split handling lands — revisit both.
+
+## 2026-07-21 — D16: Settings screen writes rules.yaml from a template with a .bak backup
+**Chose:** TAB opens an on-device rules editor; S saves via a documented template
+(comments preserved by regeneration), previous file kept as rules.yaml.bak, app
+hot-reloads rules and starts a new shoe. · **Because:** Cam wanted rules configurable
+without file editing eventually; regenerating from a template keeps the file readable
+since PyYAML drops comments. · **Rejected:** ruamel.yaml round-tripping (extra dependency
+for one file). · **Revisit if:** app.yaml wants the same treatment.
+
+## 2026-07-21 — D17: Count ledger uses a "returnable pool", not instance keys
+**Chose:** ShoeSession counts an ADDED card unless an identical card left the felt earlier
+in the same hand (then it's a return/relocation, not counted); cards still on the felt at
+end-of-hand become "stale" so their later removal can't open a recount window. Ambiguity
+resolves toward NOT counting. StableTracker events carry permanent per-(card,zone)
+instance ids (ADDED/REMOVED pair up; ids never reused). · **Because:** adversarial review
+reproduced two count-corruption bugs in the key-based design (SPACE with cards on the
+felt recounted them; zone-boundary flicker double-counted) and found instance renumbering
+broke the event contract. The pool design fixes all three with one mechanism and
+testable semantics. · **Rejected:** carrying (card,zone,instance) key-sets across hands
+(fragile against renumbering); trusting instance identity across zones (tracker can't
+provide it). · **Revisit if:** live shoe tests show systematic UNDERcounting — the
+chosen failure direction.

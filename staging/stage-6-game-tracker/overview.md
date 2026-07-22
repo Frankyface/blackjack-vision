@@ -6,14 +6,22 @@ tracking, multiple player hands (splits done properly), session statistics (Cam'
 correct play over time), and the on-screen settings editor (rules finally editable without a
 file).
 
-## Likely features (to be defined when Stage 5 completes)
-- [ ] Auto round detection — table empties → hand over; no SPACE key needed
-- [ ] Dealer draw-out + outcome scoring — win/lose/push decided automatically
-- [ ] Split-hand handling as first-class multi-hand state
-- [ ] Session stats — hands played, decision accuracy %, count accuracy, per-session history
-- [ ] Settings UI — edit rules.yaml values on-screen (keyboard navigation)
+## Features
+- [x] Auto round detection (`src/tracker.py` RoundTracker) — table empties → round scored,
+      no SPACE needed _(test-verified; live pending)_
+- [x] Dealer draw-out + outcome scoring — WIN/LOSE/PUSH/BLACKJACK/UNSCORED from the final
+      table _(test-verified; live pending)_
+- [ ] Split-hand handling as first-class multi-hand state _(NOT built — the one remaining
+      gap; the player zone is treated as a single hand)_
+- [x] Session stats — hands, W/L/P, approximate advice-followed % (HIT/STAND inference
+      only, documented) _(test-verified; live pending)_
+- [x] Settings UI (`src/ui/settings.py`) — TAB opens rules editor, S saves with .bak backup,
+      app hot-reloads rules + starts a new shoe _(save/step logic test-verified; on-screen
+      flow needs a live session)_
 
-## Definition of done (sketch)
-- [ ] A full session is dealt, scored, and summarized with zero keyboard input.
+## Definition of done
+- [ ] A full session is dealt, scored, and summarized with zero keyboard input — LIVE.
+      (`pytest tests/test_tracker.py` proves the logic; the table proves the feature.)
 
-Sketch by design — do NOT flesh out before Stage 5 is done (progressive elaboration).
+**Status 2026-07-21:** implemented ahead of schedule except split-hand state. Live
+verification pending Cam's table sessions.

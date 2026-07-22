@@ -1,5 +1,5 @@
 # Feature: Pi install
-_Stage: stage-4-pi-deployment · Status: not started_
+_Stage: stage-4-pi-deployment · Status: awaiting verification_
 
 ## Goal
 The app running on the Pi 5: NCNN-exported model, documented install (or script) over SSH,
@@ -16,11 +16,19 @@ Run the documented install on the Pi over SSH, then the same 5-card + 3-hand liv
 Stage 1/2, timing latency. Record numbers in the log. Prereqs: help.md #2, #3.
 
 ## Verification Log
-_(empty)_
+**2026-07-21 (Claude, PC-side evidence — on-Pi run pending):**
+- `deploy/export_ncnn.py` executed on the PC → `models/best_ncnn_model/` produced
+  (model.ncnn.bin 12.2 MB); ultralytics auto-installed ncnn 1.0.20260526 + pnnx.
+- NCNN model loaded through the same `CardDetector` API and run on the real-card
+  validation mosaic: detections IDENTICAL to the .pt (QD 0.72, 8S 0.53, 8D 0.52);
+  71 ms/frame steady-state on the PC (Ryzen 7 2700X). Pi 5 estimate ~200-350 ms/frame —
+  comfortably inside the ≤2 s advice budget.
+- `deploy/install_pi.sh` + kiosk service written; NOT yet executed on the Pi
+  (blocked: help.md #2 screen, #3 SSH access).
 
 ## Open Questions
-- Light detail by design — flesh out at Stage 3 completion (NCNN export flags, Pi OS
-  Wayland/X11 for pygame fullscreen, camera USB quirks).
+- Pi OS Wayland vs X11 for pygame fullscreen — resolve during the on-Pi install.
+- Webcam USB behavior on the Pi (bandwidth, index) — resolve on-Pi.
 
 ## Notes & Decisions
 - Fallbacks if too slow, in order: lower inference resolution → frame-skip (infer every Nth

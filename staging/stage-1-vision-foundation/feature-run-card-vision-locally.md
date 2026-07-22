@@ -1,5 +1,5 @@
 # Feature: Run card-vision locally
-_Stage: stage-1-vision-foundation · Status: not started_
+_Stage: stage-1-vision-foundation · Status: awaiting verification_
 
 ## Goal
 Get the upstream cadyze/card-vision YOLOv8 detector running on Cam's Windows PC against his USB
@@ -7,12 +7,13 @@ webcam, inside this repo's own structure (venv, `requirements.txt`, `src/`), so 
 feature builds on a working detection loop we control.
 
 ## Success Criteria
-- [ ] A documented, repeatable setup exists: `python -m venv`, `pip install -r requirements.txt`,
+- [x] A documented, repeatable setup exists: `python -m venv`, `pip install -r requirements.txt`,
       one script/command to download `best.pt` from the upstream repo into `models/`.
-- [ ] Running the app opens Cam's webcam and displays live video with YOLOv8 detection boxes
+- [x] Running the app opens Cam's webcam and displays live video with YOLOv8 detection boxes
       and class labels (rank+suit) drawn on detected cards.
 - [ ] A real card held in frame is detected with its correct class label, live.
-- [ ] Achieved FPS on the PC is measured and recorded in the Verification Log (baseline for
+      **← the only open item: needs Cam's webcam pointed at cards (help.md #1)**
+- [x] Achieved FPS on the PC is measured and recorded in the Verification Log (baseline for
       the Stage 4 Pi comparison).
 
 ## How We'll Verify
@@ -26,15 +27,28 @@ feature builds on a working detection loop we control.
    Needs Cam (or his webcam pointed at the table) — see help.md #1.
 
 ## Verification Log
-_(empty — a feature with an empty log can never be `verified done`)_
+**2026-07-21 (Claude, PC-side evidence — live card check still pending):**
+- venv (Python 3.9.13) + `pip install -r requirements.txt` exit 0; `dill` added to
+  requirements (checkpoint needs it to unpickle).
+- `best.pt` downloaded via the documented URL: 6,270,489 bytes → it's YOLOv8-nano.
+  Class names inspected: `10C…AS` compact format + `BACK`/`BLACK JOKER`/`RED JOKER`
+  (all handled by `src/cards.py`, jokers/backs ignored).
+- `python -m src.app --selftest` → exit 0 (model loads, blank-frame = 0 detections,
+  engines + UI render headless).
+- `python -m src.app --camera-test` → webcam opens 1280×720, 26 frames in 3.3 s
+  (7.8 fps capture); frame saved to captures/camera_test.jpg (points at a room, no cards).
+- Real-card imagery check: detector run on upstream validation mosaic
+  (captures/val_batch0_labels.jpg) → QD conf 0.72, 8S 0.53, 8D 0.52 — correct labels.
+- `python -m src.app --run-seconds 10` (real window, live camera) → ran and exited
+  cleanly, UI loop ~10.1 fps on the PC. **PC baseline for Stage 4.**
+- Live "card in frame reads correctly" NOT yet run — camera isn't at the table.
 
 ## Open Questions
-- Which exact ultralytics/torch versions? Pin what works on the PC; Pi compatibility gets its
-  own pass in Stage 4.
-- Does the upstream `main.py` logic transfer as-is, or do we only take the weights and write our
-  own loop? (Leaning: own loop — it's ~30 lines with the ultralytics API and we need custom
-  post-processing anyway.)
-- Webcam resolution/FPS sweet spot for detection vs. speed?
+- ~~Which exact ultralytics/torch versions?~~ Resolved: ultralytics 8.4.104,
+  torch 2.8.0+cpu, ncnn 1.0.20260526, pnnx 20260526 work on the PC (Python 3.9).
+- ~~Upstream main.py or own loop?~~ Resolved: own loop (src/detector.py + src/app.py);
+  only the weights are reused.
+- Webcam resolution/FPS sweet spot for detection vs. speed? (revisit at the live table test)
 
 ## Notes & Decisions
 - Weights are downloaded, not committed (docs/decisions.md D12). Raw GitHub URL for the file:

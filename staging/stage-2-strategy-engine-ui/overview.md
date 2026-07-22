@@ -6,9 +6,9 @@ Add the brain (a rules-configurable basic-strategy engine, rigorously unit-teste
 deal cards → correct action on screen in under 2 seconds.
 
 ## Features
-- [ ] `feature-rules-config.md` — `config/rules.yaml` schema, validation, defaults
-- [ ] `feature-strategy-engine.md` — basic strategy, chart-tested per rule set
-- [ ] `feature-advice-ui.md` — Pygame fullscreen: camera + boxes left, big advice right
+- [x] `feature-rules-config.md` — `config/rules.yaml` schema, validation, defaults _(verified done)_
+- [x] `feature-strategy-engine.md` — basic strategy, chart-tested per rule set _(verified done)_
+- [ ] `feature-advice-ui.md` — Pygame fullscreen: camera + boxes left, big advice right _(awaiting verification — live 10-hand demo)_
 
 ## Definition of done (testable checklist)
 - [ ] `pytest` green, including the full published-chart fixture tests for at least

@@ -1,5 +1,5 @@
 # Feature: Shoe session
-_Stage: stage-3-card-counting · Status: not started_
+_Stage: stage-3-card-counting · Status: awaiting verification_
 
 ## Goal
 The ledger that connects hands into a shoe: every stable card that appears gets counted exactly
@@ -20,7 +20,15 @@ against a manual count, matching at every ~1-deck checkpoint (procedure + card s
 help.md #4). Record checkpoints in the log.
 
 ## Verification Log
-_(empty)_
+**2026-07-21 (Claude):** `src/session.py` — "returnable pool" ledger (docs/decisions.md
+D17) over StableTracker events; SPACE end-of-hand, N-with-confirm new shoe, count panel
+in the dashboard; also tracks per-rank composition for the EV engine. Redesigned after
+adversarial review reproduced two count-corruption bugs in the first (instance-keyed)
+design: SPACE with cards on the felt recounted them, and zone-boundary flicker counted
+one card twice — both now covered by regression tests. `pytest tests/test_session.py` +
+`tests/test_session_composition.py` → 18 tests green including a scripted full 312-card
+/ 6-deck shoe ending at running count 0. The Stage 3 exit test — a LIVE full shoe on
+camera vs Cam's manual count with ~1-deck checkpoints (help.md #4) — still pending.
 
 ## Open Questions
 - Cards mucked face-down (e.g. dealer's hole card never revealed in some flows): v1 assumption
