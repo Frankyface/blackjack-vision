@@ -148,6 +148,72 @@ def test_second_identical_card_gets_its_own_added_event():
     assert len(added) == 1 and added[0].instance == 2
 
 
+def test_max_copies_caps_identical_cards_to_deck_count():
+    """Single-deck play: a second '8C' is always a misread of a neighbor."""
+    tracker = StableTracker(confirm_frames=2, forget_frames=3, max_copies=1)
+    two_copies = [
+        det("8C", box=(100, 500, 140, 560)),
+        det("8C", box=(700, 500, 740, 560)),  # far apart -> 2 clusters
+    ]
+    state = None
+    for _ in range(4):
+        state = tracker.update(two_copies)
+    assert state.counts[(card("8C"), Zone.PLAYER)] == 1
+    # with 6 decks the same input is legitimately two cards
+    tracker6 = StableTracker(confirm_frames=2, forget_frames=3, max_copies=6)
+    for _ in range(2):
+        state = tracker6.update(two_copies)
+    assert state.counts[(card("8C"), Zone.PLAYER)] == 2
+
+
+def test_max_copies_keeps_the_confirmed_zone_on_cross_zone_misread():
+    tracker = StableTracker(confirm_frames=2, forget_frames=3, max_copies=1)
+    real = det("KS", Zone.PLAYER, box=(100, 500, 140, 560))
+    for _ in range(3):
+        tracker.update([real])  # KS PLAYER confirmed
+    ghost = det("KS", Zone.DEALER, box=(100, 50, 140, 110))
+    state = None
+    for _ in range(4):
+        state = tracker.update([real, ghost])
+    assert state.counts.get((card("KS"), Zone.PLAYER)) == 1
+    assert (card("KS"), Zone.DEALER) not in state.counts
+
+
+def test_sporadic_misread_cannot_sustain_a_phantom():
+    """Live regression (2026-07-21): a stale card kept 'alive' by an occasional
+    misread of a similar card (seen ~1-in-8 frames) never expired, because any
+    single sighting fully reset the missed counter. With decay-healing, a card
+    seen in only a minority of frames must die."""
+    tracker = StableTracker(confirm_frames=2, forget_frames=6)
+    for _ in range(2):
+        tracker.update([det("QS")])  # confirmed (the card was really there once)
+
+    removed = False
+    for cycle in range(20):  # phantom pattern: 1 sighting every 4 frames
+        for _ in range(3):
+            state = tracker.update([])
+            removed = removed or any(
+                e.kind is EventKind.REMOVED for e in state.events)
+        state = tracker.update([det("QS")])  # the occasional misread
+        removed = removed or any(
+            e.kind is EventKind.REMOVED for e in state.events)
+        if removed:
+            break
+    assert removed, "a 25%-presence phantom should expire"
+
+
+def test_mostly_present_card_survives_sporadic_misses():
+    tracker = StableTracker(confirm_frames=2, forget_frames=6)
+    for _ in range(2):
+        tracker.update([det("AS")])
+    state = tracker.update([det("AS")])
+    for _ in range(15):  # real card: detected 4 of every 5 frames
+        state = tracker.update([])
+        for _ in range(4):
+            state = tracker.update([det("AS")])
+    assert state.cards(Zone.PLAYER) == (card("AS"),)
+
+
 def test_removed_event_carries_the_matching_instance_id():
     """ADDED/REMOVED must pair by permanent id, and ids are never reused."""
     tracker = StableTracker(confirm_frames=1, forget_frames=1, merge_dist=140)

@@ -173,13 +173,18 @@ class StableTracker:
         forget_frames: int = 15,
         merge_dist: float = 140.0,
         merge_scale: float = 4.0,
+        max_copies: "int | None" = None,
     ) -> None:
+        """max_copies: physical cap on identical cards visible at once — the
+        number of decks in play. A second "8C" when only one deck exists is
+        always a misread of a neighboring card."""
         if confirm_frames < 1 or forget_frames < 1:
             raise ValueError("confirm_frames and forget_frames must be >= 1")
         self._confirm = confirm_frames
         self._forget = forget_frames
         self._merge_dist = merge_dist
         self._merge_scale = merge_scale
+        self._max_copies = max_copies
         self._tracks: Dict[Tuple[Card, Zone], List[_InstanceTrack]] = {}
         self._next_uid: Dict[Tuple[Card, Zone], int] = {}
 
@@ -188,6 +193,30 @@ class StableTracker:
         observed = count_instances(detections, self._merge_dist,
                                    self._merge_scale, split_y)
         events: List[CardEvent] = []
+
+        if self._max_copies is not None:
+            # A card can't appear in more places than there are decks. The cap
+            # applies across zones; excess sightings are trimmed from keys with
+            # the fewest already-confirmed tracks (a misread rarely has a
+            # confirmed history behind it).
+            per_card: Dict[Card, int] = {}
+            for (c, _z), n in observed.items():
+                per_card[c] = per_card.get(c, 0) + n
+            for c, total in per_card.items():
+                excess = total - self._max_copies
+                if excess <= 0:
+                    continue
+                keys_for_card = sorted(
+                    (k for k in observed if k[0] == c),
+                    key=lambda k: sum(
+                        1 for t in self._tracks.get(k, []) if t.confirmed),
+                )
+                for k in keys_for_card:
+                    if excess <= 0:
+                        break
+                    trim = min(excess, observed[k])
+                    observed[k] -= trim
+                    excess -= trim
 
         keys = set(self._tracks) | set(observed)
         for key in keys:
@@ -202,7 +231,11 @@ class StableTracker:
             for idx, track in enumerate(tracks):
                 if idx < seen_n:  # this instance was seen this frame
                     track.seen_streak += 1
-                    track.missed = 0
+                    # Heal by decay, not reset: an occasional misread refreshing
+                    # a stale track (seen 1-in-8 frames) must NOT keep a phantom
+                    # card alive forever. A real card is detected most frames,
+                    # so its missed count still drains to zero quickly.
+                    track.missed = max(0, track.missed - 2)
                     if not track.confirmed and track.seen_streak >= self._confirm:
                         track.confirmed = True
                         events.append(

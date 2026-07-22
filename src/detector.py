@@ -30,7 +30,8 @@ class CardDetector:
     def detect(self, frame) -> List[RawDetection]:
         """Run inference on one BGR frame (numpy array)."""
         results = self._model.predict(
-            frame, conf=self._confidence, verbose=False
+            frame, conf=self._confidence, verbose=False,
+            agnostic_nms=True,  # one corner patch = one label, never two classes
         )
         detections: List[RawDetection] = []
         frame_height = frame.shape[0]

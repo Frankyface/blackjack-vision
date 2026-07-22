@@ -109,9 +109,11 @@ class Dashboard:
             annotated = vm.frame.copy()
             for box, label in vm.boxes:
                 x1, y1, x2, y2 = (int(v) for v in box)
-                cv2.rectangle(annotated, (x1, y1), (x2, y2), (80, 220, 120), 2)
-                cv2.putText(annotated, label, (x1, max(y1 - 6, 12)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (80, 220, 120), 2)
+                thickness = 2 if label else 1  # unlabeled = extra corner of a card
+                cv2.rectangle(annotated, (x1, y1), (x2, y2), (80, 220, 120), thickness)
+                if label:
+                    cv2.putText(annotated, label, (x1, max(y1 - 6, 12)),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (80, 220, 120), 2)
             if vm.zone_split_y:
                 cv2.line(annotated, (0, vm.zone_split_y), (fw, vm.zone_split_y),
                          (230, 190, 90), 2)

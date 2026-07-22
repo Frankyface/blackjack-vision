@@ -77,7 +77,8 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
     # Camera opens LAST so a model/UI failure can't leak the device handle.
     detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split)
     tracker = StableTracker(cfg.confirm_frames, cfg.forget_frames,
-                            cfg.merge_dist_px, cfg.merge_scale)
+                            cfg.merge_dist_px, cfg.merge_scale,
+                            max_copies=rules.decks)
     session = ShoeSession(decks=rules.decks)
     rounds = RoundTracker()
     stats = SessionStats()
@@ -147,7 +148,10 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
                             flash(f"save failed: {exc}", 4.0)
                         else:
                             session = ShoeSession(decks=rules.decks)
-                            tracker.reset()
+                            tracker = StableTracker(
+                                cfg.confirm_frames, cfg.forget_frames,
+                                cfg.merge_dist_px, cfg.merge_scale,
+                                max_copies=rules.decks)
                             rounds.reset()
                             ev_cache.clear()
                             if not rules.uses_multideck_chart:
@@ -163,7 +167,18 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
                 state = tracker.update(detections,
                                        split_y=frame.shape[0] * cfg.zone_split)
                 session.apply_events(state.events)
-                boxes = [(d.box, f"{d.card} {d.zone.value[0]}") for d in detections]
+                # one labeled box per card — extra corner boxes drawn unlabeled
+                strongest = {}
+                for d in detections:
+                    key = (d.card, d.zone)
+                    if key not in strongest or d.confidence > strongest[key].confidence:
+                        strongest[key] = d
+                boxes = [
+                    (d.box,
+                     f"{d.card} {d.zone.value[0]}"
+                     if strongest[(d.card, d.zone)] is d else "")
+                    for d in detections
+                ]
                 if log_events and state.events:
                     stamp = time.strftime("%H:%M:%S")
                     for e in state.events:
