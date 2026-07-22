@@ -1,0 +1,28 @@
+# App settings — camera, detection tuning, zones, UI. Game rules live in rules.yaml.
+camera:
+  index: 0
+  width: 1280
+  height: 720
+
+detection:
+  model_path: models/best.pt   # swapped for the NCNN export dir on the Pi
+  confidence: 0.5
+  merge_dist_px: 140           # same-class boxes closer than this = corners of ONE card
+  confirm_frames: 5            # frames a card must persist before it's trusted
+  forget_frames: 15            # missed frames before a trusted card is dropped
+
+zones:
+  split: 0.45                  # fraction of frame height; above = DEALER, below = PLAYER
+
+ui:
+  fullscreen: false            # true on the Pi (kiosk); false while developing
+  show_fps: true
+
+counting:
+  bet_unit: 10                 # whatever "1 unit" means to you
+  bet_ramp:                    # true count -> units to bet (>= last key uses last value)
+    1: 1
+    2: 2
+    3: 4
+    4: 8
+    5: 12

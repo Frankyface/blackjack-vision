@@ -1,0 +1,32 @@
+# systemd user service — starts the trainer once the Pi's graphical session is up.
+#
+# Install (as the pi user, from the repo root):
+#   mkdir -p ~/.config/systemd/user
+#   cp deploy/blackjack-vision.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable blackjack-vision
+# Then enable desktop autologin (raspi-config → System → Boot / Auto Login →
+# Desktop Autologin) so a graphical session exists at power-on. The unit is tied
+# to graphical-session.target, so it starts with the session and stops with it —
+# do NOT use loginctl enable-linger for this unit (a lingering user manager has
+# no display and the app would crash-loop).
+#
+# If the app can't open a display on Wayland (Bookworm default is labwc),
+# uncomment the WAYLAND_DISPLAY line; on an X11 session use the DISPLAY line.
+[Unit]
+Description=blackjack-vision trainer (kiosk)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/blackjack-vision
+ExecStart=%h/blackjack-vision/.venv/bin/python -m src.app --fullscreen
+Restart=on-failure
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+# Environment=WAYLAND_DISPLAY=wayland-0
+# Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical-session.target

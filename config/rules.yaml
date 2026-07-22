@@ -1,0 +1,10 @@
+# Game rules — the single source of rule truth. All engines read these via engines/rules.py.
+# Default: the most common modern casino game (6-deck, H17, DAS, 3:2).
+decks: 6
+dealer_hits_soft_17: true      # H17. false = S17
+double_after_split: true       # DAS
+resplit_limit: 3               # max number of hands you can split to
+resplit_aces: false
+late_surrender: false
+blackjack_payout: 1.5          # 3:2. (1.2 = 6:5 — avoid those tables!)
+double_restrictions: any2      # any2 | 9-11 | 10-11
