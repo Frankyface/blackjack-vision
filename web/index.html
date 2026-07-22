@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>blackjack-vision — live trainer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.2/dist/ort.min.js"></script>
+</head>
+<body>
+  <main>
+    <section id="cam-panel">
+      <div id="video-wrap">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div id="zone-labels"><span>DEALER</span><span>PLAYER</span></div>
+      </div>
+      <div id="cam-controls">
+        <select id="camera-select" title="camera"></select>
+        <label>zone <input id="zone-slider" type="range" min="20" max="80" value="45"></label>
+        <span id="perf"></span>
+      </div>
+    </section>
+
+    <section id="advice-panel">
+      <div class="hands">
+        <div>Dealer: <span id="dealer-cards">—</span></div>
+        <div>You: <span id="player-cards">—</span> <span id="player-total"></span></div>
+      </div>
+      <div id="action">…</div>
+      <div id="count-block">
+        <div id="count-line">Running <b id="running">+0</b> · True <b id="true">+0.0</b></div>
+        <div id="count-sub"><span id="decks-left">6.0</span> decks left · bet <b id="bet">1u</b></div>
+      </div>
+      <div id="status"></div>
+      <div class="buttons">
+        <button id="end-hand">End hand</button>
+        <button id="new-shoe">New shoe</button>
+      </div>
+      <details id="rules-box">
+        <summary>Game rules</summary>
+        <label>Decks
+          <select id="rule-decks"><option>1</option><option>2</option><option>4</option><option selected>6</option><option>8</option></select>
+        </label>
+        <label>Dealer soft 17
+          <select id="rule-h17"><option value="hit" selected>hits</option><option value="stand">stands</option></select>
+        </label>
+        <label>Double after split
+          <select id="rule-das"><option value="yes" selected>yes</option><option value="no">no</option></select>
+        </label>
+        <label>Late surrender
+          <select id="rule-ls"><option value="no" selected>no</option><option value="yes">yes</option></select>
+        </label>
+      </details>
+      <footer>
+        Home practice tool — using any device to aid play in a real casino is illegal
+        in many places. Cards are read by their corner indexes: keep every card's
+        top-left index visible. · <a href="https://github.com/Frankyface/blackjack-vision">source</a>
+      </footer>
+    </section>
+  </main>
+  <div id="loading">loading model…</div>
+  <script src="app.js"></script>
+</body>
+</html>
