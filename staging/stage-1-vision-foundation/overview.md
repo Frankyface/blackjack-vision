@@ -6,21 +6,24 @@ per-frame output into a stable, zone-aware stream of "these cards are on the tab
 the blackjack engines (Stage 2+) can trust.
 
 ## Features
-- [ ] `feature-run-card-vision-locally.md` — upstream YOLOv8 detector running on Cam's PC + webcam _(awaiting verification — live card check)_
-- [ ] `feature-table-zones.md` — dealer/player zone mapping with visual overlay _(awaiting verification — live boundary check)_
-- [ ] `feature-stable-card-reading.md` — corner dedupe + debounce → stable card set _(awaiting verification — live occlusion check)_
+- [x] `feature-run-card-vision-locally.md` — upstream YOLOv8 detector running on Cam's PC + webcam _(verified done — 32 distinct cards live)_
+- [x] `feature-table-zones.md` — dealer/player zone mapping with visual overlay _(verified done — live, incl. straddle fix)_
+- [x] `feature-stable-card-reading.md` — corner dedupe + debounce → stable card set _(verified done — live, incl. merge_scale fix)_
 
-**Status 2026-07-21:** all code + unit tests done and green; every remaining checklist item
-below needs Cam's webcam pointed at real cards on his table (help.md #1).
+**STAGE COMPLETE 2026-07-21** — live-verified at Cam's table (four sessions, ~5 min,
+32 distinct cards, zero misreads on first placement; two live-found bugs fixed with
+regression tests). Evidence: the feature Verification Logs + captures/live_*.jpg.
 
 ## Definition of done (testable checklist)
-- [ ] `python -m src.app` opens a live window showing the webcam feed with detection boxes.
-- [ ] Cards from Cam's actual deck, on his table, under his lighting, are identified with the
+- [x] `python -m src.app` opens a live window showing the webcam feed with detection boxes.
+- [x] Cards from Cam's actual deck, on his table, under his lighting, are identified with the
       correct rank+suit (spot-check ≥ 20 different cards; ≥ 18 read correctly on first placement).
-- [ ] The frame shows a visible zone boundary; a card placed top-of-frame reports as DEALER,
+      → 32 distinct cards, 32 correct (2026-07-21 live sessions).
+- [x] The frame shows a visible zone boundary; a card placed top-of-frame reports as DEALER,
       bottom-of-frame as PLAYER, verified live for ≥ 5 cards each.
-- [ ] A dealt card appears in the stable card set exactly once (no corner duplicates, no
+- [x] A dealt card appears in the stable card set exactly once (no corner duplicates, no
       flicker in/out across 10 seconds of observation), and disappears when removed.
-- [ ] Unit tests exist and pass for the pure logic: corner dedupe, zone mapping, debounce
-      state machine (`pytest` green).
-- [ ] All three feature files are `verified done` with Verification Log entries.
+      → verified live after the merge_scale fix; 18+ s flicker-free stretches observed.
+- [x] Unit tests exist and pass for the pure logic: corner dedupe, zone mapping, debounce
+      state machine (`pytest` green — 197 tests).
+- [x] All three feature files are `verified done` with Verification Log entries.

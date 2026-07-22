@@ -7,7 +7,8 @@ camera:
 detection:
   model_path: models/best.pt   # swapped for the NCNN export dir on the Pi
   confidence: 0.5
-  merge_dist_px: 140           # same-class boxes closer than this = corners of ONE card
+  merge_dist_px: 140           # merge floor: same-class boxes this close = ONE card
+  merge_scale: 4.0             # ...or within 4x the corner-box size (close-up cards)
   confirm_frames: 5            # frames a card must persist before it's trusted
   forget_frames: 15            # missed frames before a trusted card is dropped
 

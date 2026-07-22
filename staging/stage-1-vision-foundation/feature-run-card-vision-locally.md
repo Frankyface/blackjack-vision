@@ -1,5 +1,5 @@
 # Feature: Run card-vision locally
-_Stage: stage-1-vision-foundation · Status: awaiting verification_
+_Stage: stage-1-vision-foundation · Status: verified done_
 
 ## Goal
 Get the upstream cadyze/card-vision YOLOv8 detector running on Cam's Windows PC against his USB
@@ -11,8 +11,7 @@ feature builds on a working detection loop we control.
       one script/command to download `best.pt` from the upstream repo into `models/`.
 - [x] Running the app opens Cam's webcam and displays live video with YOLOv8 detection boxes
       and class labels (rank+suit) drawn on detected cards.
-- [ ] A real card held in frame is detected with its correct class label, live.
-      **← the only open item: needs Cam's webcam pointed at cards (help.md #1)**
+- [x] A real card held in frame is detected with its correct class label, live.
 - [x] Achieved FPS on the PC is measured and recorded in the Verification Log (baseline for
       the Stage 4 Pi comparison).
 
@@ -42,6 +41,17 @@ feature builds on a working detection loop we control.
 - `python -m src.app --run-seconds 10` (real window, live camera) → ran and exited
   cleanly, UI loop ~10.1 fps on the PC. **PC baseline for Stage 4.**
 - Live "card in frame reads correctly" NOT yet run — camera isn't at the table.
+
+**2026-07-21 (Cam + Claude, LIVE at the table — criteria met):** webcam mounted looking
+down at Cam's desk; four `--log-events` sessions (~5 min total, ~10 fps loop). **32
+distinct cards read correctly** — all four aces, all four queens, KC/KH, JS, 10C/10D/
+10H/10S, black + red suits — including overlapping cards (5D over QD: both read) and
+cards blurred mid-placement correctly ignored; face-down backs ignored. One transient
+phantom (a second "QC" for ~1 s, likely a misread queen at an angle) — noted, absorbed
+by debounce+ledger as a single stray count. Two real bugs found live and fixed with
+regression tests: close-range corner split (fixed via size-scaled merge, `merge_scale`)
+and a card straddling the zone line counting twice (fixed via zone-blind clustering).
+→ **verified done**
 
 ## Open Questions
 - ~~Which exact ultralytics/torch versions?~~ Resolved: ultralytics 8.4.104,

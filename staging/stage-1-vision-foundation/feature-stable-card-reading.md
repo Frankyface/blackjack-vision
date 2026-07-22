@@ -1,5 +1,5 @@
 # Feature: Stable card reading
-_Stage: stage-1-vision-foundation · Status: awaiting verification_
+_Stage: stage-1-vision-foundation · Status: verified done_
 
 ## Goal
 Turn noisy per-frame YOLO detections into a trustworthy "cards currently on the table" set:
@@ -41,10 +41,18 @@ clustering + per-instance debounce (confirm 5 / forget 15 frames, configurable).
 tests/test_stable_reading.py` → 12 tests green: two-corner merge, transitive chains,
 same card in both zones, two far-apart copies, flicker rejection, occlusion survival,
 removal after forget, second-instance ADDED events, reset. UI shows the stable set (not
-raw detections). Live steps 2-4 (real 3-card hand steady 10 s, hand-wave occlusion,
-removal timing) pending Cam's table session. Behavior note: after a REMOVED, a re-add of
-the same (card, zone, instance) within one hand does NOT recount — safer against double
-counting; recorded for the live test to confirm it feels right.
+raw detections). Behavior note: after a REMOVED, a re-add of the same card within one
+hand does NOT recount — safer against double counting.
+
+**2026-07-21 (Cam + Claude, LIVE):** static cards held rock-steady in the stable set for
+18+ s stretches with zero flicker; Cam's hands passed over the table constantly across
+four sessions without dropping confirmed cards (occlusion grace working); removals
+tracked real pickups within ~1-2 s. Close-range corner split found live → fixed with
+size-scaled merging (`merge_scale: 4.0` in app.yaml) + regression test; one transient
+phantom QC (~1 s) in 5 minutes was contained to a single stray count by the
+debounce + returnable-pool ledger. Open questions above are now answered by real
+footage: distance+scale clustering works; corner misreads exist but are rare and
+transient (the QC case). → **verified done**
 
 ## Notes & Decisions
 - none yet — revisit when starting.

@@ -10,10 +10,11 @@ def test_defaults_are_the_shipped_game():
 
 
 def test_shipped_rules_yaml_loads(tmp_path):
-    # the real shipped file must always be valid
+    # the real config file must always be VALID — but it's user-editable state
+    # (the settings screen rewrites it), so never pin its exact values here
     from pathlib import Path
     r = load_rules(Path(__file__).resolve().parents[1] / "config" / "rules.yaml")
-    assert r == Rules()
+    assert isinstance(r, Rules)
 
 
 def test_unknown_key_names_the_key():

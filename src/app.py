@@ -68,7 +68,7 @@ def compute_ev(state, rules, session, cache):
 
 
 def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
-        run_seconds: float = 0) -> int:
+        run_seconds: float = 0, log_events: bool = False) -> int:
     from .capture import Camera
     from .detector import CardDetector
     from .ui.dashboard import Dashboard, ViewModel
@@ -76,7 +76,8 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
 
     # Camera opens LAST so a model/UI failure can't leak the device handle.
     detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split)
-    tracker = StableTracker(cfg.confirm_frames, cfg.forget_frames, cfg.merge_dist_px)
+    tracker = StableTracker(cfg.confirm_frames, cfg.forget_frames,
+                            cfg.merge_dist_px, cfg.merge_scale)
     session = ShoeSession(decks=rules.decks)
     rounds = RoundTracker()
     stats = SessionStats()
@@ -159,9 +160,19 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
             boxes = []
             if not paused and frame is not None:
                 detections = detector.detect(frame)
-                state = tracker.update(detections)
+                state = tracker.update(detections,
+                                       split_y=frame.shape[0] * cfg.zone_split)
                 session.apply_events(state.events)
                 boxes = [(d.box, f"{d.card} {d.zone.value[0]}") for d in detections]
+                if log_events and state.events:
+                    stamp = time.strftime("%H:%M:%S")
+                    for e in state.events:
+                        print(f"[{stamp}] {e.kind.value} {e.card} {e.zone.value} "
+                              f"#{e.instance}", flush=True)
+                    print(f"[{stamp}] table: dealer={[str(c) for c in state.cards(Zone.DEALER)]} "
+                          f"player={[str(c) for c in state.cards(Zone.PLAYER)]} "
+                          f"running={session.count.running}", flush=True)
+                    _save_evidence_frame(frame, detections, cfg)
                 end_of_round = rounds.update(state)
                 if end_of_round is not None:
                     end_hand(end_of_round)
@@ -210,6 +221,28 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
     finally:
         camera.release()
         dashboard.close()
+
+
+_evidence_count = 0
+
+
+def _save_evidence_frame(frame, detections, cfg, limit: int = 20) -> None:
+    """Annotated snapshots for the verification log (captures/, gitignored)."""
+    global _evidence_count
+    if _evidence_count >= limit:
+        return
+    import cv2
+
+    out = ROOT / "captures"
+    out.mkdir(exist_ok=True)
+    annotated = frame.copy()
+    for d in detections:
+        x1, y1, x2, y2 = (int(v) for v in d.box)
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), (80, 220, 120), 2)
+        cv2.putText(annotated, f"{d.card} {d.confidence:.2f}", (x1, max(y1 - 6, 12)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (80, 220, 120), 2)
+    _evidence_count += 1
+    cv2.imwrite(str(out / f"live_{_evidence_count:02d}.jpg"), annotated)
 
 
 def selftest(cfg: AppConfig, rules: Rules) -> int:
@@ -291,6 +324,8 @@ def main(argv=None) -> int:
     parser.add_argument("--fullscreen", action="store_true")
     parser.add_argument("--run-seconds", type=float, default=0,
                         help="exit automatically after N seconds (testing)")
+    parser.add_argument("--log-events", action="store_true",
+                        help="print card ADDED/REMOVED events and save annotated frames")
     args = parser.parse_args(argv)
 
     cfg = load_app_config(ROOT / "config" / "app.yaml")
@@ -304,7 +339,7 @@ def main(argv=None) -> int:
     if args.camera_test:
         return camera_test(cfg)
     return run(cfg, rules, fullscreen=args.fullscreen or cfg.fullscreen,
-               run_seconds=args.run_seconds)
+               run_seconds=args.run_seconds, log_events=args.log_events)
 
 
 if __name__ == "__main__":

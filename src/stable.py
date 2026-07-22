@@ -73,17 +73,33 @@ def _dist(a: Box, b: Box) -> float:
     return math.hypot(ax - bx, ay - by)
 
 
-def cluster_boxes(boxes: Sequence[Box], merge_dist: float) -> List[List[int]]:
+def _max_dim(box: Box) -> float:
+    return max(box[2] - box[0], box[3] - box[1])
+
+
+def _mergeable(a: Box, b: Box, merge_dist: float, merge_scale: float) -> bool:
+    """Two same-class boxes are corners of ONE card if their centres are close
+    relative to how big the boxes are: a card held near the camera has large
+    corner boxes AND widely separated corners, so the threshold must scale with
+    box size (merge_dist alone is only the floor)."""
+    threshold = max(merge_dist, merge_scale * max(_max_dim(a), _max_dim(b)))
+    return _dist(a, b) <= threshold
+
+
+def cluster_boxes(
+    boxes: Sequence[Box], merge_dist: float, merge_scale: float = 0.0
+) -> List[List[int]]:
     """Greedy single-link clustering of box indices by centre distance.
 
-    Pure helper. Boxes closer than merge_dist end up in one cluster (corners of
-    the same card); anything further apart stays separate.
+    Pure helper. Boxes within the (possibly size-scaled) threshold end up in
+    one cluster (corners of the same card); anything further stays separate.
     """
     clusters: List[List[int]] = []
     for i in range(len(boxes)):
         placed = False
         for cluster in clusters:
-            if any(_dist(boxes[i], boxes[j]) <= merge_dist for j in cluster):
+            if any(_mergeable(boxes[i], boxes[j], merge_dist, merge_scale)
+                   for j in cluster):
                 cluster.append(i)
                 placed = True
                 break
@@ -96,7 +112,7 @@ def cluster_boxes(boxes: Sequence[Box], merge_dist: float) -> List[List[int]]:
         for a in range(len(clusters)):
             for b in range(a + 1, len(clusters)):
                 if any(
-                    _dist(boxes[i], boxes[j]) <= merge_dist
+                    _mergeable(boxes[i], boxes[j], merge_dist, merge_scale)
                     for i in clusters[a]
                     for j in clusters[b]
                 ):
@@ -110,16 +126,34 @@ def cluster_boxes(boxes: Sequence[Box], merge_dist: float) -> List[List[int]]:
 
 
 def count_instances(
-    detections: Sequence[RawDetection], merge_dist: float
+    detections: Sequence[RawDetection], merge_dist: float,
+    merge_scale: float = 0.0, split_y: "float | None" = None
 ) -> Dict[Tuple[Card, Zone], int]:
-    """Pure: frame detections -> how many physical copies of each (card, zone)."""
-    grouped: Dict[Tuple[Card, Zone], List[Box]] = {}
+    """Pure: frame detections -> how many physical copies of each (card, zone).
+
+    Corners are clustered per CARD (zone-blind) so a card straddling the zone
+    line — one corner each side — still merges into a single card. The merged
+    card's zone comes from the cluster centre: against split_y when given,
+    otherwise the zone of the cluster's lowest box (the on-the-line-is-PLAYER
+    convention).
+    """
+    grouped: Dict[Card, List[RawDetection]] = {}
     for d in detections:
-        grouped.setdefault((d.card, d.zone), []).append(d.box)
-    return {
-        key: len(cluster_boxes(boxes, merge_dist))
-        for key, boxes in grouped.items()
-    }
+        grouped.setdefault(d.card, []).append(d)
+
+    counts: Dict[Tuple[Card, Zone], int] = {}
+    for card_key, dets in grouped.items():
+        boxes = [d.box for d in dets]
+        for cluster in cluster_boxes(boxes, merge_dist, merge_scale):
+            centers_y = [_center(boxes[i])[1] for i in cluster]
+            if split_y is not None:
+                zone = Zone.DEALER if (sum(centers_y) / len(centers_y)) < split_y \
+                    else Zone.PLAYER
+            else:
+                lowest = max(cluster, key=lambda i: _center(boxes[i])[1])
+                zone = dets[lowest].zone
+            counts[(card_key, zone)] = counts.get((card_key, zone), 0) + 1
+    return counts
 
 
 @dataclass
@@ -138,17 +172,21 @@ class StableTracker:
         confirm_frames: int = 5,
         forget_frames: int = 15,
         merge_dist: float = 140.0,
+        merge_scale: float = 4.0,
     ) -> None:
         if confirm_frames < 1 or forget_frames < 1:
             raise ValueError("confirm_frames and forget_frames must be >= 1")
         self._confirm = confirm_frames
         self._forget = forget_frames
         self._merge_dist = merge_dist
+        self._merge_scale = merge_scale
         self._tracks: Dict[Tuple[Card, Zone], List[_InstanceTrack]] = {}
         self._next_uid: Dict[Tuple[Card, Zone], int] = {}
 
-    def update(self, detections: Sequence[RawDetection]) -> StableState:
-        observed = count_instances(detections, self._merge_dist)
+    def update(self, detections: Sequence[RawDetection],
+               split_y: "float | None" = None) -> StableState:
+        observed = count_instances(detections, self._merge_dist,
+                                   self._merge_scale, split_y)
         events: List[CardEvent] = []
 
         keys = set(self._tracks) | set(observed)

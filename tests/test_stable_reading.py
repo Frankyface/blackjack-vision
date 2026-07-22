@@ -26,9 +26,37 @@ def test_two_far_boxes_are_two_cards():
     assert len(cluster_boxes(boxes, merge_dist=140)) == 2
 
 
+def test_close_up_card_corners_merge_via_scale():
+    """Real-world regression (live test 2026-07-21): a card near the camera had
+    its two corner boxes ~190px apart — beyond the 140px floor — and became a
+    phantom duplicate. With merge_scale, big boxes widen the threshold."""
+    corners = [(490, 390, 520, 440), (590, 540, 620, 600)]  # ~186px apart, ~55px tall
+    assert len(cluster_boxes(corners, merge_dist=140, merge_scale=4.0)) == 1
+    # far-away cards have small boxes: the scale term stays below the floor and
+    # two genuinely separate cards at 500px stay separate
+    small = [(100, 100, 120, 130), (600, 100, 620, 130)]
+    assert len(cluster_boxes(small, merge_dist=140, merge_scale=4.0)) == 2
+
+
 def test_transitive_chain_merges_into_one_cluster():
     boxes = [(0, 0, 40, 60), (100, 0, 140, 60), (200, 0, 240, 60)]  # a-b-c chain
     assert len(cluster_boxes(boxes, merge_dist=120)) == 1
+
+
+def test_card_straddling_the_zone_line_is_one_card():
+    """Live regression (2026-07-21): a 2D on the boundary had one corner in
+    each zone and was counted twice. Corners must merge zone-blind, with the
+    merged card's zone taken from the cluster centre vs split_y."""
+    straddle = [
+        det("2D", Zone.DEALER, box=(500, 280, 530, 330)),  # corner above line
+        det("2D", Zone.PLAYER, box=(560, 350, 590, 400)),  # corner below line
+    ]
+    counts = count_instances(straddle, merge_dist=140, merge_scale=4.0, split_y=324)
+    assert sum(counts.values()) == 1
+    assert counts == {(card("2D"), Zone.PLAYER): 1}  # centroid y=340 > 324
+    # same geometry but the card sits clearly above the line -> DEALER
+    counts = count_instances(straddle, merge_dist=140, merge_scale=4.0, split_y=400)
+    assert counts == {(card("2D"), Zone.DEALER): 1}
 
 
 def test_count_instances_separates_same_card_in_both_zones():

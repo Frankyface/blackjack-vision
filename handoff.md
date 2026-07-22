@@ -1,39 +1,42 @@
 # Handoff — blackjack-vision
-_Last updated: 2026-07-21 · Current stage: stage-1-vision-foundation (live verification)_
+_Last updated: 2026-07-21 · Current stage: stage-2-strategy-engine-ui (live demo)_
 
 ## 🎯 Goals
-All six stages are CODED and unit-tested (183 tests green). The project is now in
-verification mode: prove the pipeline on Cam's real table, then deploy to the Pi.
+Stage 1 is DONE (live-verified at the table). Next: the Stage 2 exit demo — 10 real hands
+where Cam checks the on-screen advice against a printed chart — then the Stage 3 live
+shoe count, then Pi deployment.
 
 ## 📍 Current State
-- Full app works on the PC: `python -m src.app` → camera + boxes + advice + count + EV
-  + auto-round stats + TAB settings. 10 s live windowed run OK (~10 fps loop).
-- Verified: engines (strategy chart 100% both rule sets, Hi-Lo, EV vs benchmarks),
-  broken-config fail-fast, NCNN export produces IDENTICAL detections at 71 ms/frame (PC).
-- Detector proven on real card imagery (upstream validation photos) — NOT yet on Cam's
-  own cards/lighting.
-- Pi untouched (blocked: help.md #2 screen, #3 SSH). Split hands not modeled (stage 6 gap).
+- STAGE 1 COMPLETE: 32 distinct cards read correctly live (4 sessions, ~5 min, ~10 fps);
+  zones, overlap, occlusion all verified. Two live-found bugs fixed + regression-tested
+  (close-range corner split → merge_scale; zone-line straddle → zone-blind clustering).
+- Cam used the TAB settings screen live: rules.yaml now decks: 1 (his single physical
+  deck) — settings save/hot-reload verified. Chart is still the 4-8 deck table (warned).
+- 197 tests green. Engines + NCNN export verified earlier. Pi still untouched.
+- Known imperfection: rare transient misread (one phantom QC, ~1 s, in 5 min) — debounce
+  + ledger contained it to one stray count.
 
 ## 📂 Files I'm Working On
-- None mid-edit. Next work happens live at the table, then on the Pi.
+- None mid-edit.
 
 ## ✅ Things I've Changed
-- 2026-07-21: Implemented ALL stages: vision pipeline, strategy+rules, counting+session,
-  EV engine, tracker+stats+settings UI, Pi deploy artifacts; 183 tests; NCNN validated.
-- 2026-07-21: Scaffolded full doc system, staged roadmap, slash commands; git + GitHub.
+- 2026-07-21: LIVE Stage 1 verification with Cam; merge_scale + straddle fixes; settings
+  screen field-tested; `--log-events` instrumentation added.
+- 2026-07-21: Implemented ALL stages + 195→197 tests; adversarial review, 15 findings fixed.
+- 2026-07-21: Scaffolded docs, git, GitHub.
 
 ## ❌ Watch Out
-- Upstream demo GIF is useless as a test asset → see docs/failed-approaches.md; use
-  captures/val_batch0_labels.jpg for offline detector checks.
-- Dev venv is Python 3.9 (system) — keep code 3.9-compatible; Pi runs 3.11.
-- models/ is gitignored — fresh clones run scripts/fetch_model.py (+ deploy/export_ncnn.py).
+- rules.yaml is USER STATE (settings screen rewrites it) — never assert its contents in
+  tests; decks currently 1.
+- Cards read best index-toward-camera; avoid parking a card exactly on the zone line.
+- Dev venv Python 3.9; keep code 3.9-compatible (Pi runs 3.11).
 
 ## ➡️ Next Up
-1. Cam: mount the webcam over the table (help.md #1) → run the Stage 1 live checks
-   (20-card spot check, zone line, occlusion) and log results via /verify.
-2. Then the Stage 2 exit demo: 10 hands vs a printed chart, < 2 s advice.
-3. Then Pi install (help.md #2, #3) → `bash deploy/install_pi.sh` → kiosk → v1 acceptance.
+1. Stage 2 exit demo: deal 10 hands (1 dealer card up, 2+ player cards), Cam checks each
+   on-screen action vs a printed chart, time-to-advice < 2 s → log in feature-advice-ui.
+2. Stage 3 exit: full-shoe live count vs Cam's manual count (needs multi-deck shoe, help.md #4).
+3. Pi install (help.md #2/#3): `bash deploy/install_pi.sh` → kiosk → v1 acceptance.
 
 ## 🔗 Pointer
-→ Current stage folder: `staging/stage-1-vision-foundation/` ·
-Active feature file: `staging/stage-1-vision-foundation/feature-run-card-vision-locally.md`
+→ Current stage folder: `staging/stage-2-strategy-engine-ui/` ·
+Active feature file: `staging/stage-2-strategy-engine-ui/feature-advice-ui.md`

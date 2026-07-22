@@ -1,5 +1,5 @@
 # Feature: Table zones
-_Stage: stage-1-vision-foundation · Status: awaiting verification_
+_Stage: stage-1-vision-foundation · Status: verified done_
 
 ## Goal
 Split the camera frame into a DEALER zone (top) and PLAYER zone (bottom) so every detected card
@@ -27,6 +27,13 @@ UI camera panel; split configurable as `zones.split` in config/app.yaml. `pytest
 tests/test_zones.py` → 7 tests green (top/bottom/on-line/moved-boundary/validation).
 Live steps 2-4 (cards straddling the line on camera, config change visibly moving the
 line) pending Cam's table session.
+
+**2026-07-21 (Cam + Claude, LIVE):** dealer-top / player-bottom assignment verified
+across four sessions (every top-of-frame card tagged DEALER, bottom PLAYER); cards slid
+between zones re-tagged correctly and the count-ledger absorbed the relocations. Live
+edge case found: a card straddling the boundary split into one card per zone → fixed
+(corners cluster zone-blind, merged card's zone from its centre vs split_y) with a
+regression test from the real geometry. → **verified done**
 
 ## Open Questions
 - Is a straight horizontal line enough, or does Cam's camera angle need a tilted/curved
