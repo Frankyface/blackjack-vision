@@ -1,10 +1,11 @@
 # Handoff — blackjack-vision
-_Last updated: 2026-07-21 · Current stage: stage-2-strategy-engine-ui (live demo)_
+_Last updated: 2026-07-22 · Current stage: stage-2-strategy-engine-ui (live demo) + web app shipped_
 
 ## 🎯 Goals
-Stage 1 is DONE (live-verified at the table). Next: the Stage 2 exit demo — 10 real hands
-where Cam checks the on-screen advice against a printed chart — then the Stage 3 live
-shoe count, then Pi deployment.
+Stage 1 DONE (live-verified). NEW: browser version live at
+https://frankyface.github.io/blackjack-vision/ (D19 — same model in ONNX Runtime Web,
+chart JSON generated from the Python engine). Next: Stage 2 exit demo (10 hands vs a
+printed chart, desktop or web), Stage 3 live shoe count, Pi deployment.
 
 ## 📍 Current State
 - STAGE 1 COMPLETE: 32 distinct cards read correctly live (4 sessions, ~5 min, ~10 fps);
@@ -20,10 +21,13 @@ shoe count, then Pi deployment.
 - None mid-edit.
 
 ## ✅ Things I've Changed
-- 2026-07-21: LIVE Stage 1 verification with Cam; merge_scale + straddle fixes; settings
-  screen field-tested; `--log-events` instrumentation added.
-- 2026-07-21: Implemented ALL stages + 195→197 tests; adversarial review, 15 findings fixed.
-- 2026-07-21: Scaffolded docs, git, GitHub.
+- 2026-07-22: Web app built + deployed to GitHub Pages (D19); overlay-alignment and
+  resolution-scaled merge fixes from Cam's live browser test.
+- 2026-07-21: Detection quality campaign (D18): imgsz 960 A/B, phantom decay, agnostic
+  NMS, deck copy cap, model research (docs/model-research-2026-07.md); ow27d-nano
+  downloaded but A/B vs best.pt NOT yet run (camera got moved).
+- 2026-07-21: LIVE Stage 1 verification; merge_scale + straddle fixes; 201 tests.
+- 2026-07-21: Implemented ALL stages; adversarial review, 15 findings fixed.
 
 ## ❌ Watch Out
 - rules.yaml is USER STATE (settings screen rewrites it) — never assert its contents in
@@ -34,8 +38,10 @@ shoe count, then Pi deployment.
 ## ➡️ Next Up
 1. Stage 2 exit demo: deal 10 hands (1 dealer card up, 2+ player cards), Cam checks each
    on-screen action vs a printed chart, time-to-advice < 2 s → log in feature-advice-ui.
-2. Stage 3 exit: full-shoe live count vs Cam's manual count (needs multi-deck shoe, help.md #4).
-3. Pi install (help.md #2/#3): `bash deploy/install_pi.sh` → kiosk → v1 acceptance.
+2. Unfinished: A/B models/ow27d-nano.pt vs best.pt on live frames (scratchpad ab_models.py
+   pattern) — decide default; web/assets/best.onnx must match whatever wins.
+3. Stage 3 exit: full-shoe live count vs manual count (needs multi-deck shoe, help.md #4).
+4. Pi install (help.md #2/#3): `bash deploy/install_pi.sh` → kiosk → v1 acceptance.
 
 ## 🔗 Pointer
 → Current stage folder: `staging/stage-2-strategy-engine-ui/` ·

@@ -137,3 +137,17 @@ models are Pi-hostile mediums or unlicensed. · **Rejected:** unmeasured model s
 immediate fine-tune (recipe documented for later). · **Revisit if:** misreads persist at
 960 after the fanning convention (indexes visible) — then execute the fine-tune recipe
 with frames from Cam's webcam.
+
+## 2026-07-22 — D19: Browser web app on GitHub Pages (workflow deploy from web/)
+**Chose:** A static single-page app at https://frankyface.github.io/blackjack-vision/ —
+ONNX Runtime Web (WASM, WebGPU when available) running the same YOLOv8n weights at 960;
+strategy chart shipped as JSON GENERATED from the chart-fixture-verified Python engine
+(scripts/export_web_assets.py — the browser never re-derives the chart); compact JS
+ports of the stable-tracker and returnable-pool ledger; Pages build_type=workflow
+deploying web/ via .github/workflows/pages.yml. · **Because:** Cam wanted it shareable
+like his other GH Pages apps; inspired by roboflow/blackjack-basic-strategy but keeping
+our dealer/player zone split and counting. Browser detections verified equal to Python
+on the same image (±0.03 conf); ~0.9 s/frame WASM. · **Rejected:** roboflow.js hosted
+model (online-only, no zone logic); porting the chart by hand (drift risk).
+· **Out of web v1:** EV panel, session stats, settings persistence — desktop-only for
+now. · **Revisit if:** WebGPU adoption makes 960 fast enough to add EV in-browser.

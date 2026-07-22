@@ -1,8 +1,12 @@
 # blackjack-vision
 
-A Raspberry Pi 5 blackjack trainer. A webcam watches real cards on the table; a YOLOv8 model
-reads them; an HDMI screen shows the mathematically correct play, the Hi-Lo running/true count,
-and (eventually) live win probabilities. Deal, glance, learn.
+A blackjack trainer that watches real cards through a camera. A YOLOv8 model reads them;
+the screen shows the mathematically correct play, the Hi-Lo running/true count, and live
+win probabilities. Deal, glance, learn.
+
+**▶ Try it in your browser: https://frankyface.github.io/blackjack-vision/** — detection
+runs entirely client-side (ONNX Runtime Web); nothing leaves your machine. The full
+version (EV panel, session stats, kiosk mode) runs on a PC or Raspberry Pi 5 below.
 
 **Status:** fully implemented and unit-tested (183 tests); live table verification and the
 Raspberry Pi install are in progress — see `handoff.md` for the current state.
