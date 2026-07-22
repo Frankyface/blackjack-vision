@@ -125,3 +125,15 @@ testable semantics. · **Rejected:** carrying (card,zone,instance) key-sets acro
 (fragile against renumbering); trusting instance identity across zones (tracker can't
 provide it). · **Revisit if:** live shoe tests show systematic UNDERcounting — the
 chosen failure direction.
+
+## 2026-07-21 — D18: Keep cadyze/card-vision; fix misreads with imgsz 960 + hygiene
+**Chose:** Stay on the current model. Raise inference resolution to 960 (measured A/B on
+the live failing layout: 640 double-read the 8C and missed two cards; 960 read the exact
+true table at 128 ms/frame PC). Layered detection hygiene added the same day: class-
+agnostic NMS, phantom decay-healing, deck-count copy cap, zone-blind corner clustering.
+· **Because:** an Opus research sweep (docs/model-research-2026-07.md) found no public
+model verifiably better — the only drop-in nano publishes no metrics; better-documented
+models are Pi-hostile mediums or unlicensed. · **Rejected:** unmeasured model swap;
+immediate fine-tune (recipe documented for later). · **Revisit if:** misreads persist at
+960 after the fanning convention (indexes visible) — then execute the fine-tune recipe
+with frames from Cam's webcam.

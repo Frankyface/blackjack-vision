@@ -15,7 +15,8 @@ from .zones import assign_zone
 
 
 class CardDetector:
-    def __init__(self, model_path: str, confidence: float, zone_split: float) -> None:
+    def __init__(self, model_path: str, confidence: float, zone_split: float,
+                 imgsz: int = 960) -> None:
         if not Path(model_path).exists():
             raise FileNotFoundError(
                 f"model not found: {model_path} — run scripts/fetch_model.py first"
@@ -25,6 +26,7 @@ class CardDetector:
         self._model = YOLO(model_path)
         self._confidence = confidence
         self._zone_split = zone_split
+        self._imgsz = imgsz
         self._names = self._model.names
 
     def detect(self, frame) -> List[RawDetection]:
@@ -32,6 +34,7 @@ class CardDetector:
         results = self._model.predict(
             frame, conf=self._confidence, verbose=False,
             agnostic_nms=True,  # one corner patch = one label, never two classes
+            imgsz=self._imgsz,  # corner indexes are tiny — don't shrink them away
         )
         detections: List[RawDetection] = []
         frame_height = frame.shape[0]

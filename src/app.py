@@ -1,4 +1,4 @@
-"""blackjack-vision main loop.
+﻿"""blackjack-vision main loop.
 
   python -m src.app                # run (windowed unless app.yaml says fullscreen)
   python -m src.app --fullscreen   # force fullscreen (Pi kiosk)
@@ -75,7 +75,7 @@ def run(cfg: AppConfig, rules: Rules, fullscreen: bool,
     from .ui.settings import SettingsScreen, save_rules
 
     # Camera opens LAST so a model/UI failure can't leak the device handle.
-    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split)
+    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split, cfg.imgsz)
     tracker = StableTracker(cfg.confirm_frames, cfg.forget_frames,
                             cfg.merge_dist_px, cfg.merge_scale,
                             max_copies=rules.decks)
@@ -273,7 +273,7 @@ def selftest(cfg: AppConfig, rules: Rules) -> int:
     print(f"rules: {rules}")
     print(f"app config: {cfg}")
 
-    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split)
+    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split, cfg.imgsz)
     fake = np.zeros((cfg.camera_height, cfg.camera_width, 3), dtype=np.uint8)
     detections = detector.detect(fake)
     print(f"model loaded; blank-frame detections: {len(detections)} (expect 0)")
@@ -359,3 +359,4 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

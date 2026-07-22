@@ -19,6 +19,7 @@ class AppConfig:
     camera_height: int = 720
     model_path: str = "models/best.pt"
     confidence: float = 0.5
+    imgsz: int = 960
     merge_dist_px: float = 140.0
     merge_scale: float = 4.0
     confirm_frames: int = 5
@@ -43,6 +44,9 @@ class AppConfig:
         if self.merge_scale < 0:
             raise AppConfigError(
                 f"detection.merge_scale: must be >= 0, got {self.merge_scale}")
+        if not 320 <= self.imgsz <= 1920:
+            raise AppConfigError(
+                f"detection.imgsz: must be 320-1920, got {self.imgsz}")
         if self.camera_index < 0:
             raise AppConfigError(f"camera.index: must be >= 0, got {self.camera_index}")
         if self.camera_width <= 0 or self.camera_height <= 0:
@@ -72,6 +76,7 @@ def load_app_config(path: "str | Path") -> AppConfig:
             camera_height=int(cam.get("height", 720)),
             model_path=str(det.get("model_path", "models/best.pt")),
             confidence=float(det.get("confidence", 0.5)),
+            imgsz=int(det.get("imgsz", 960)),
             merge_dist_px=float(det.get("merge_dist_px", 140.0)),
             merge_scale=float(det.get("merge_scale", 4.0)),
             confirm_frames=int(det.get("confirm_frames", 5)),

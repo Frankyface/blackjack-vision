@@ -1,4 +1,4 @@
-"""Run the card detector on an image / GIF frame and print what it sees.
+﻿"""Run the card detector on an image / GIF frame and print what it sees.
 
 Usage: python scripts/detect_image.py <path> [frame_index]
 Saves an annotated copy next to the input as <name>_detected.jpg.
@@ -39,7 +39,7 @@ def main() -> int:
             return 1
 
     cfg = load_app_config(ROOT / "config" / "app.yaml")
-    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split)
+    detector = CardDetector(str(ROOT / cfg.model_path), cfg.confidence, cfg.zone_split, cfg.imgsz)
     detections = detector.detect(frame)
 
     print(f"{path.name} frame {frame_index}: {len(detections)} detections")
@@ -59,3 +59,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

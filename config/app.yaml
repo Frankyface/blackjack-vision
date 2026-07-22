@@ -7,6 +7,8 @@ camera:
 detection:
   model_path: models/best.pt   # swapped for the NCNN export dir on the Pi
   confidence: 0.5
+  imgsz: 960                   # inference resolution. 640 misreads corner glyphs
+                               # (measured A/B 2026-07-21); drop on the Pi if slow
   merge_dist_px: 140           # merge floor: same-class boxes this close = ONE card
   merge_scale: 4.0             # ...or within 4x the corner-box size (close-up cards)
   confirm_frames: 5            # frames a card must persist before it's trusted

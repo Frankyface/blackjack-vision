@@ -31,5 +31,9 @@ Stage 1/2, timing latency. Record numbers in the log. Prereqs: help.md #2, #3.
 - Webcam USB behavior on the Pi (bandwidth, index) — resolve on-Pi.
 
 ## Notes & Decisions
-- Fallbacks if too slow, in order: lower inference resolution → frame-skip (infer every Nth
-  frame) → Pi AI Kit (Hailo ~$70, goes to help.md if needed).
+- 2026-07-21: default inference is now `imgsz: 960` (D18) — the PC cost roughly doubled
+  (71→128 ms). Re-measure on the Pi; the NCNN export may need `imgsz=960` at export time
+  to match. Budget check: 960 on Pi ≈ 0.5-1.2 s/frame estimated — likely still inside
+  the 2 s advice budget but MEASURE FIRST.
+- Fallbacks if too slow, in order: lower inference resolution (800/640) → frame-skip
+  (infer every Nth frame) → Pi AI Kit (Hailo ~$70, goes to help.md if needed).
